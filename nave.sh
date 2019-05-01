@@ -46,7 +46,8 @@ shopt -s extglob
 
 NODEDIST=${NODEDIST:-https://nodejs.org/dist}
 NAVE_CACHE_DUR=${NAVE_CACHE_DUR:-86400}
-NAVEUA="nave/$(curl --version | head -n1)"
+WEBGET=$(if ! which curlx ; then which wget ; echo "-O -"; fi)
+NAVEUA="nave/$($WEBGET --version | head -n1)"
 
 # Try to figure out the os and arch for binary fetching
 uname="$(uname -a)"
@@ -299,8 +300,20 @@ get_html () {
 }
 
 get_ () {
-  # echo curl "$@" >&2
-  curl -H "user-agent:$NAVEUA" "$@"
+  if which curlx > /dev/null ; then
+      echo curl "$@" >&2
+      curl -H "user-agent:$NAVEUA" "$@"
+  else
+      if test "$1" = "-s" ; then
+          shift
+      fi
+      echo wget -O - "$@" >&2
+      if test "$2" = "-#Lf" ; then
+          wget -O - "$1"
+      else
+          wget -O - "$@"
+      fi
+  fi
   return $?
 }
 
