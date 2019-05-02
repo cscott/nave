@@ -46,7 +46,7 @@ shopt -s extglob
 
 NODEDIST=${NODEDIST:-https://nodejs.org/dist}
 NAVE_CACHE_DUR=${NAVE_CACHE_DUR:-86400}
-WEBGET=$(if ! which curlx ; then which wget ; echo "-O -"; fi)
+WEBGET=$(if ! which curl ; then if ! which wget ; then which php; fi; fi)
 NAVEUA="nave/$($WEBGET --version | head -n1)"
 
 # Try to figure out the os and arch for binary fetching
@@ -300,19 +300,23 @@ get_html () {
 }
 
 get_ () {
-  if which curlx > /dev/null ; then
-      echo curl "$@" >&2
+  if which curl > /dev/null ; then
+      #echo curl "$@" >&2
       curl -H "user-agent:$NAVEUA" "$@"
-  else
+  elif which wget > /dev/null; then
       if test "$1" = "-s" ; then
           shift
       fi
-      echo wget -O - "$@" >&2
+      #echo wget -O - "$@" >&2
       if test "$2" = "-#Lf" ; then
           wget -O - "$1"
       else
           wget -O - "$@"
       fi
+  else
+      SELF_PATH=$(dirname "$0")
+      #echo php "$SELF_PATH/curl.php" "$@" >&2
+      php "$SELF_PATH/curl.php" "$@"
   fi
   return $?
 }
