@@ -95,9 +95,10 @@ main () {
       NAVE_DIR=$prefix/lib/nave
     fi
   fi
-  if ! [ -d "$NAVE_DIR" ] && ! ensure_dir "$NAVE_DIR"; then
+  if ! [ -d "$NAVE_DIR" ] && ! try_dir "$NAVE_DIR"; then
     NAVE_DIR="$(dirname -- "$SELF_PATH")"
   fi
+  ensure_dir "$NAVE_DIR"
 
   # set up the naverc init file.
   # For zsh compatibility, we name this file ".zshenv" instead of
@@ -188,6 +189,13 @@ ensure_dir () {
   if ! [ -d "$1" ]; then
     mkdir -p -- "$1" || fail "couldn't create $1"
   fi
+}
+
+try_dir () {
+  if ! [ -d "$1" ]; then
+    mkdir -p -- "$1" 2>/dev/null || return 1
+  fi
+  return 0
 }
 
 remove_dir () {
