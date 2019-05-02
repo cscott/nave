@@ -99,6 +99,9 @@ main () {
     NAVE_DIR="$(dirname -- "$SELF_PATH")"
   fi
   ensure_dir "$NAVE_DIR"
+  if [ ! -d "$HOME" ]; then
+      export HOME="$NAVE_DIR"
+  fi
 
   # set up the naverc init file.
   # For zsh compatibility, we name this file ".zshenv" instead of
